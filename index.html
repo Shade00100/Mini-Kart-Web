@@ -140,6 +140,9 @@ kbd{display:inline-block;min-width:1.5rem;text-align:center;padding:.05rem .4rem
 </div>
 <div id="po" class="fixed inset-0 z-40" style="display:none;background:rgba(2,3,8,.97);overflow-y:auto"><div style="width:min(94vw,460px);margin:0 auto;padding:14px 0 30px"><h2 class="font-bold text-center" style="font-size:1.3rem;letter-spacing:.25em">PERFIL</h2><div class="orn"></div><div id="poh"></div><div id="pot" style="display:flex;margin-top:6px"></div><div id="pob"></div><div class="mb" style="margin-top:14px" onclick="proClose()">VOLTAR</div></div></div>
 <div id="inv" class="hp text-center" style="display:none;position:fixed;left:50%;top:56px;transform:translateX(-50%);z-index:70;max-width:92%"></div>
+<div id="ap" class="fixed inset-0" style="display:none;z-index:45;background:rgba(2,3,8,.97);overflow-y:auto"><div style="width:min(94vw,460px);margin:0 auto;padding:14px 0 30px"><h2 class="font-bold text-center" style="font-size:1.3rem;letter-spacing:.2em">PAINEL ADMIN</h2><div class="orn"></div><div id="apb"></div><div class="mb" style="margin-top:14px" onclick="apClose()">FECHAR</div></div></div>
+<div id="tut" class="fixed inset-0" style="display:none;z-index:75;background:rgba(2,3,8,.88);align-items:center;justify-content:center"><div id="tutb" class="pcard" style="width:min(90vw,380px);padding:22px 18px"></div></div>
+<div id="alt" class="hp text-center" style="display:none;position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:80;max-width:92%;width:420px;border-color:#facc15;font-size:.95rem" onclick="this.style.display='none'"></div>
 <div id="nk" class="fixed inset-0 z-50 flex items-center justify-center" style="display:none;background:rgba(2,3,8,.94)"><div style="width:min(90vw,380px);text-align:center;max-height:100%;overflow-y:auto">
  <p id="nkt" class="mb-2 text-sm" style="color:#cfd6e6"></p>
  <input id="nki" maxlength="14" autocomplete="username" autocapitalize="off" class="ta" style="height:auto;text-align:center;font-size:1.1rem" placeholder="Nickname">
@@ -399,12 +402,12 @@ function unlockRainbow(){
  saveSV();syncGV();renderMenu();toast('🌈 RAINBOW desbloqueado! Nível máximo. Ultra Dash e explosão em área disponíveis.');
 }
 function runAdmCommand(){
- const el=$('admcmd');if(!el)return;const cmd=el.value.trim().toLowerCase();
+ const el=$('admcmd'),raw=(typeof arguments[0]==='string'?arguments[0]:el?el.value:'').trim(),cmd=raw.toLowerCase();if(!raw&&!el)return;if(admRoute(raw)){if(el)el.value='';return}
  if(cmd==='unlockall23'){SV.ach=SV.ach||{};SV.lv=SV.lv||{};SV.own=SV.own||{};for(const c of CH){if(c.ach)SV.ach[c.ach]=1;SV.lv[c.id]=5}for(const it of SHOP)SV.own[it.id]=1;SV.coins=Math.max(SV.coins||0,0);saveSV();checkAch();renderMenu();toast('🔓 Todos os personagens e itens desbloqueados; níveis no máximo!')}
  else if(cmd==='op+'){unlockRainbow()}
  else if(cmd==='coinsnow'){SV.coins=(SV.coins||0)+5000;saveSV();renderMenu();toast('🪙 +5000 moedas!')}
  else {toast('❌ Comando desconhecido. Confira a escrita.')}
- el.value='';
+ if(el)el.value='';
 }
 const SPN={fan:['🔥','Leque de Fogo','3 mísseis em leque'],bolt:['🌩️','Raio','atordoa quem está à frente'],quake:['💥','Terremoto','onda de choque ao redor'],warp:['🌀','Salto Estelar','teleporta para a frente'],eclipse:['🌙','Eclipse','atordoa o rival à frente'],phx:['🦅','Renascer','cura, turbo e escudo'],snow:['❄️','Nevasca','desacelera rivais próximos'],mines:['🧨','Campo de Minas','3 minas atrás de você'],solar:['☀️','Raio Solar','queima e atordoa rivais por perto'],glitch:['👾','Glitch','trava e lentifica rivais ao redor'],wave:['🌊','Onda Gigante','empurra rivais para longe'],dragon:['🐉','Sopro do Dragão','5 chamas teleguiadas']};
 function stats(ch,lv){const f=1+.05*(lv-1),o={};for(const k in ch.st)o[k]=ch.st[k]*f;return o}
@@ -740,7 +743,7 @@ function defs(){
       :[['Criar conta',()=>openAcct('create')],['Entrar',()=>openAcct('login')],['Importar conta (backup)',()=>openAcct('import')],['Voltar',()=>go('main')]];
     return{t:'Conta',s:'PERFIL',x,i:it}}
   if(scr==='opt')return{t:'Opções',i:[['Seleção de pista · '+(SV.rnd?'Aleatória':'Escolher'),()=>{SV.rnd=!SV.rnd;saveSV()}],['Adversários · '+nb,()=>nb=(nb+1)%4],['Dificuldade · '+DF[df],()=>df=(df+1)%3],['Voltas · '+LAPS,()=>{const L=[1,2,3,5];LAPS=L[(L.indexOf(LAPS)+1)%4];SV.laps=LAPS;saveSV()}],['Eventos · '+(SV.ev?'Ligados':'Desligados'),()=>{SV.ev=!SV.ev;saveSV()}],['Tela cheia · '+(isFS()?'Ligada':'Desligada'),()=>{goFull(true);setTimeout(renderMenu,400)}],['Extras',()=>go('extras')],['Voltar',()=>go('main')]]};
-  if(scr==='extras')return{t:'Extras',s:'COMANDOS ESPECIAIS',x:'<div style="max-width:360px;margin:auto;text-align:left"><label for="admcmd" class="text-xs mb-2 block" style="color:#aab2c5">DIGITE UM COMANDO DE ADM</label><input id="admcmd" class="ta" style="height:auto;text-align:center;font-size:1.05rem" placeholder="Digite um comando..." autocomplete="off" autocapitalize="off"><div class="mb mt-3" onclick="runAdmCommand()">EXECUTAR COMANDO</div><p class="text-xs mt-2" style="color:#8b93a7">Comandos disponíveis: UnlockAll23, OP+, CoinsNow</p></div>',i:[['Executar comando',()=>runAdmCommand()],['Voltar',()=>go('opt')]]};
+  if(scr==='extras')return{t:'Extras',s:'COMANDOS ESPECIAIS',x:'<div style="max-width:360px;margin:auto;text-align:left"><label for="admcmd" class="text-xs mb-2 block" style="color:#aab2c5">DIGITE UM COMANDO DE ADM</label><input id="admcmd" class="ta" style="height:auto;text-align:center;font-size:1.05rem" placeholder="Digite um comando..." autocomplete="off" autocapitalize="off"><div class="mb mt-3" onclick="runAdmCommand()">EXECUTAR COMANDO</div></div>',i:[['Executar comando',()=>runAdmCommand()],['Voltar',()=>go('opt')]]};
   if(scr==='ctl')return{t:'Controles',x:'<div style="max-width:360px;margin:auto;text-align:left">'+CTLH+'</div>',i:[['Voltar',()=>go('main')]]};
   if(scr==='pause')return{t:'Pausado',i:[['Continuar',resume],['Reiniciar',()=>start(mode)],['Menu Principal',toMain]]};
   return{t:resT,s:resS,i:NET.on?mpRes():champ?[champ.next?['Próxima corrida',nextRace]:['Novo campeonato',startChamp],['Menu Principal',toMain]]:[['Jogar de novo',()=>start(mode)],['Menu Principal',toMain]]};
@@ -1279,6 +1282,91 @@ function proRender(){const T=[['perfil','PERFIL'],['amigos','AMIGOS'+((SV.fri||[
   $('pob').innerHTML=PO.tab==='amigos'?proAmi():PO.tab==='desafios'?proDes():PO.tab==='rec'?proRew():proPerfil()}
 addEventListener('keydown',e=>{if(!PO.open)return;if(e.key==='Escape'){e.stopImmediatePropagation();e.stopPropagation();e.preventDefault();proClose();return}if(!/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))e.stopImmediatePropagation()},true);
 
+/* ===== ADMIN: painel, rede de avisos e comandos ===== */
+const ADM_KEY='KartAdm@23',ADM_HUB='kart3d-admhub';
+const ADM={on:false,pr:null,pl:{},log:[],err:'',ok:0,wait:{}};
+function asig(t,ts,m){const s=ADM_KEY+'|'+t+'|'+ts+'|'+m;let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(h2>>>0).toString(36)+(h1>>>0).toString(36)}
+const aMsg=(t,m)=>{const ts=Date.now();m=String(m||'');return{t,ts,m,g:asig(t,ts,m)}};
+const aOk=o=>!!o&&typeof o==='object'&&typeof o.t==='string'&&typeof o.m==='string'&&Math.abs(Date.now()-o.ts)<6e5&&o.g===asig(o.t,o.ts,o.m);
+const cleanTxt=(v,n)=>String(v||'').replace(/[<>&"'`]+/g,' ').replace(/\s+/g,' ').trim().slice(0,n||200);
+const agNick=()=>SV.acct&&SV.acct.nick?SV.acct.nick:'Convidado';
+/* --- lado do jogador (recebe ordens do admin) --- */
+const AG={pr:null,c:null,busy:0};
+function agTick(){if(ADM.pr||typeof Peer==='undefined')return;
+  if(AG.c&&AG.c.open)return sendTo(AG.c,{t:'hello',n:agNick(),l:SV.pl||1});
+  if(AG.busy)return;AG.busy=1;setTimeout(()=>{AG.busy=0},12000);
+  try{if(!AG.pr||AG.pr.destroyed){AG.pr=mkPeer();AG.pr.on('error',()=>{});AG.pr.on('disconnected',()=>{try{AG.pr.reconnect()}catch(e){}})}
+    const go=()=>{const c=AG.pr.connect(ADM_HUB,{serialization:'json',reliable:true});
+      c.on('open',()=>{AG.c=c;AG.busy=0;sendTo(c,{t:'hello',n:agNick(),l:SV.pl||1})});c.on('data',m=>agMsg(c,m));c.on('close',()=>{if(AG.c===c)AG.c=null});c.on('error',()=>{})};
+    if(AG.pr.open)go();else AG.pr.once('open',go)}catch(e){}}
+function agMsg(c,m){if(!aOk(m)||c.peer!==ADM_HUB)return;
+  if(m.t==='alert')showAlert(cleanTxt(m.m,200));
+  else if(m.t==='bal')sendTo(c,{t:'balr',r:cleanTxt(m.m,20),coins:SV.coins||0,n:agNick()});
+  else if(m.t==='reset')doReset();
+  else if(m.t==='help')tutOpen()}
+let altT=null;
+function showAlert(txt){const e=$('alt');e.innerHTML='<div style="font-size:.68rem;letter-spacing:.2em;color:#facc15">📢 AVISO DO ADMIN</div><div style="margin-top:3px">'+txt+'</div>';e.style.display='block';clearTimeout(altT);altT=setTimeout(()=>{e.style.display='none'},12000)}
+function doReset(){const k={};for(const f of['acct','fc','fr','frp','fri','frd'])if(SV[f]!==undefined)k[f]=SV[f];loadSave(Object.assign(DEFSV(),JSON.parse(JSON.stringify(k))));if(state!=='menu'&&!NET.on)toMain();toast('♻️ Seu progresso foi resetado por um administrador.')}
+/* --- lado do admin (hub) --- */
+function admStart(){if(ADM.pr||typeof Peer==='undefined'){if(typeof Peer==='undefined')ADM.err='Sem internet (PeerJS não carregou).';return}
+  try{if(AG.c)AG.c.close()}catch(e){}AG.c=null;ADM.err='';let pr;try{pr=mkPeer(ADM_HUB)}catch(e){ADM.err=e.message;return}ADM.pr=pr;
+  pr.on('open',()=>{ADM.ok=1;ADM.err='';apRefresh()});
+  pr.on('connection',c=>{c.on('data',m=>{if(!m||typeof m!=='object')return;
+      if(m.t==='hello'){ADM.pl[c.peer]={c,n:cleanNick(m.n)||'Convidado',l:Math.min(LVMAX,Math.max(1,Math.floor(+m.l)||1)),ts:Date.now()};apRefresh()}
+      else if(m.t==='balr'){const w=ADM.wait[String(m.r)];if(w)w(Math.floor(+m.coins)||0,cleanNick(m.n))}});
+    const d=()=>{if(ADM.pl[c.peer]&&ADM.pl[c.peer].c===c){delete ADM.pl[c.peer];apRefresh()}};c.on('close',d);c.on('error',d)});
+  pr.on('error',e=>{if(e.type==='unavailable-id'){ADM.err='Já existe outro admin com o painel ativo (só um por vez). Tente de novo em instantes.';ADM.ok=0;try{pr.destroy()}catch(x){}ADM.pr=null;apRefresh()}});
+  pr.on('disconnected',()=>{try{pr.reconnect()}catch(e){}})}
+function admStop(){ADM.on=false;ADM.ok=0;ADM.pl={};if(ADM.pr){try{ADM.pr.removeAllListeners();ADM.pr.destroy()}catch(e){}}ADM.pr=null;apRefresh()}
+const admPl=()=>Object.values(ADM.pl).filter(p=>p.c&&p.c.open);
+const admFind=n=>admPl().find(p=>p.n.toLowerCase()===n.toLowerCase());
+function admOut(m){ADM.log.unshift(m);ADM.log.length=Math.min(ADM.log.length,30);toast(m);apRefresh()}
+function admRoute(raw){const w=(raw.split(/\s+/)[0]||'').toLowerCase(),arg=raw.slice((raw.split(/\s+/)[0]||'').length).trim();
+  if(w==='adminpainel'){apOpen();return true}
+  if(!['help','alert','balance','resetprogress'].includes(w))return false;
+  if(!ADM.on){toast('🔒 Comando de admin. Entre primeiro no Adminpainel.');return true}
+  const me=agNick().toLowerCase();
+  if(w==='alert'){if(!arg){admOut('Uso: Alert <mensagem>');return true}const t=cleanTxt(arg,200);let n=0;for(const p of admPl()){sendTo(p.c,aMsg('alert',t));n++}showAlert(t);admOut(`📢 Aviso enviado para ${n} jogador${n===1?'':'es'} online.`);return true}
+  if(!arg){admOut('Uso: '+(w==='help'?'Help':w==='balance'?'Balance':'Resetprogress')+' <nome do jogador>'+(w==='help'?' (ou só Help para você)':''));return true}
+  const self=arg.toLowerCase()===me,p=admFind(arg);
+  if(w==='help'){if(self){tutOpen();admOut('📘 Tutorial aberto para você.')}else if(p){sendTo(p.c,aMsg('help'));admOut(`📘 Tutorial enviado para ${p.n}.`)}else admOut(`❌ "${cleanTxt(arg,14)}" não está online.`);return true}
+  if(w==='balance'){if(self)admOut(`💰 ${agNick()} tem ${SV.coins||0} 🪙`);else if(p){const id=String(Date.now()%1e9)+Math.floor(Math.random()*99);const to=setTimeout(()=>{delete ADM.wait[id];admOut(`⌛ ${p.n} não respondeu.`)},6000);ADM.wait[id]=(c,n)=>{clearTimeout(to);delete ADM.wait[id];admOut(`💰 ${n||p.n} tem ${c} 🪙`)};sendTo(p.c,aMsg('bal',id))}else admOut(`❌ "${cleanTxt(arg,14)}" não está online.`);return true}
+  if(w==='resetprogress'){if(!self&&!p){admOut(`❌ "${cleanTxt(arg,14)}" não está online.`);return true}
+    if(!confirm('Resetar TODO o progresso de '+(self?'você mesmo':p.n)+'? Isso não pode ser desfeito.'))return true;
+    if(self){doReset();admOut('♻️ Seu progresso foi resetado.')}else{sendTo(p.c,aMsg('reset'));admOut(`♻️ Progresso de ${p.n} resetado.`)}return true}
+  return true}
+const APC=[['Adminpainel','Abre este painel'],['Help <jogador>','Mostra o tutorial divertido para o jogador'],['Alert <mensagem>','Envia um aviso na tela de todos os jogadores online'],['Balance <jogador>','Mostra quantas moedas o jogador tem'],['Resetprogress <jogador>','Reseta todo o progresso do jogador'],['UnlockAll23','Desbloqueia tudo para você'],['OP+','Libera o personagem secreto'],['CoinsNow','+5000 moedas para você']];
+const AP={open:0};
+function apOpen(){AP.open=1;$('ap').style.display='block';$('ap').scrollTop=0;apRender()}
+function apClose(){AP.open=0;$('ap').style.display='none'}
+function apRefresh(){if(!AP.open)return;const a=document.activeElement;if(a&&a.tagName==='INPUT'&&$('ap').contains(a))return;apRender()}
+function apLogin(){const v=$('apk').value;if(v===ADM_KEY){ADM.on=true;admStart();toast('🛡️ Modo admin ativado');apRender()}else{$('ape').textContent='Senha incorreta.';$('apk').value=''}}
+function apRun(){const e=$('apc'),v=e.value.trim();if(!v)return;e.value='';runAdmCommand(v);apRender();setTimeout(()=>{const x=$('apc');if(x)x.focus()},0)}
+function apFill(i){const x=$('apc');if(x){x.value=APC[i][0].split(' ')[0]+(APC[i][0].includes('<')?' ':'');x.focus()}}
+function apRender(){let h;
+  if(!ADM.on)h=`<div class="pcard"><div style="font-size:.85rem;margin-bottom:8px">🔒 Área restrita de administradores</div><input id="apk" type="password" class="ta" autocomplete="off" placeholder="Senha de admin" style="height:auto;text-align:center" onkeydown="event.stopPropagation();if(event.key==='Enter')apLogin()"><div id="ape" style="font-size:.72rem;color:#fca5a5;min-height:1rem;margin-top:4px"></div><span class="pbt pg" onclick="apLogin()">ENTRAR</span></div>`;
+  else{const L=admPl();h=`<div class="pcard"><div style="font-size:.8rem;color:${ADM.ok?'#4ade80':ADM.err?'#fca5a5':'#fde047'}">${ADM.ok?'● Rede de admin ativa':ADM.err?'⚠ '+ADM.err:'○ Conectando…'}</div><div style="font-size:.7rem;color:#8b93a7;margin-top:2px">${L.length} jogador${L.length===1?'':'es'} online (com o jogo aberto)</div>${L.length?`<div style="margin-top:6px;font-size:.78rem;text-align:left">${L.map(p=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #1d2438"><span>🟢 ${p.n}</span><span style="color:#8b93a7">Nv ${p.l}</span></div>`).join('')}</div>`:''}</div>
+    <div class="psec">COMANDOS <small>toque para preencher</small></div><div class="pcard" style="text-align:left;padding:4px 10px">${APC.map((c,i)=>`<div style="padding:6px 0;border-bottom:1px solid #1d2438;cursor:pointer" onclick="apFill(${i})"><b style="font-size:.84rem;color:#facc15">${c[0]}</b><div style="font-size:.7rem;color:#8b93a7">${c[1]}</div></div>`).join('')}</div>
+    <div class="pcard"><div style="display:flex;gap:6px"><input id="apc" class="ta" autocomplete="off" autocapitalize="off" placeholder="Digite um comando…" style="height:auto;flex:1;min-width:0;text-align:center" onkeydown="event.stopPropagation();if(event.key==='Enter')apRun()"><span class="pbt pg" style="margin:0;flex:none" onclick="apRun()">EXECUTAR</span></div>${ADM.log.length?`<div style="margin-top:8px;text-align:left;font-size:.72rem;color:#cfd6e6;max-height:9rem;overflow-y:auto">${ADM.log.map(l=>`<div style="padding:2px 0;border-bottom:1px solid #1d2438">${l}</div>`).join('')}</div>`:''}</div>
+    <span class="pbt" onclick="admStop()">SAIR DO MODO ADMIN</span>`}
+  $('apb').innerHTML=h}
+/* --- tutorial --- */
+const TUT=[['👋','Bem-vindo ao Mini Kart!','Aqui o objetivo é simples: correr, derrapar e cruzar a linha de chegada em 1º lugar. Bora aprender em 1 minuto?'],
+ ['🎮','Controles','No PC: <b>W/↑</b> acelera, <b>S/↓</b> freia, <b>A D/← →</b> viram e <b>Espaço</b> derrapa. <b>E</b> ou <b>Shift</b> usa o item. No celular, use os botões na tela.'],
+ ['🌀','A arte do drift','Segure derrapar numa curva e solte: sai um mini-turbo! As faíscas mudam de cor — soltar na hora certa dá um <b>drift perfeito</b>, com turbo extra.'],
+ ['🎁','Caixas e moedas','Passe pelas caixas para ganhar itens (mísseis, escudos, minas…). Pegue moedas: elas compram visuais incríveis na Loja e na Garagem.'],
+ ['🏁','Modos de jogo','Corrida, Caça às Moedas, Batalha, Campeonato, Contra o Relógio e Multiplayer. Chame os amigos pelo Perfil e corra junto!'],
+ ['⭐','Evolua sempre','Cada corrida dá XP. Suba de nível, faça os desafios diários, conquiste troféus e libere itens exclusivos em <b>Meu Piloto</b>.'],
+ ['🚀','Tudo pronto!','Dica final: cair da pista custa tempo, então respire e curve com carinho. Boa corrida, piloto!']];
+const TU={open:0,i:0};
+function tutOpen(){if((state==='race'||state==='count')&&!NET.on)pause();TU.open=1;TU.i=0;$('tut').style.display='flex';tutRender()}
+function tutClose(){TU.open=0;$('tut').style.display='none'}
+function tutGo(d){TU.i+=d;if(TU.i<0)TU.i=0;if(TU.i>=TUT.length)return tutClose();tutRender()}
+function tutRender(){const s=TUT[TU.i],last=TU.i===TUT.length-1;$('tutb').innerHTML=`<div style="font-size:3rem;line-height:1">${s[0]}</div><h3 style="font-weight:bold;font-size:1.25rem;margin:8px 0 6px;color:#facc15">${s[1]}</h3><p style="font-size:.9rem;color:#cfd6e6;line-height:1.5">${s[2]}</p><div style="margin:14px 0 8px">${TUT.map((_,i)=>`<i style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i===TU.i?'#facc15':'#394155'}"></i>`).join('')}</div><div style="display:flex;gap:8px;justify-content:center">${TU.i?`<span class="pbt" onclick="tutGo(-1)">◀ VOLTAR</span>`:`<span class="pbt" onclick="tutClose()">PULAR</span>`}<span class="pbt pg" onclick="tutGo(1)">${last?'VAMOS LÁ!':'PRÓXIMO ▶'}</span></div>`}
+addEventListener('keydown',e=>{if(TU.open){e.stopImmediatePropagation();e.stopPropagation();if(e.key==='Escape')tutClose();else if(e.key==='Enter'||e.key==='ArrowRight')tutGo(1);else if(e.key==='ArrowLeft')tutGo(-1);e.preventDefault();return}
+  if(AP.open){if(e.key==='Escape'){e.stopImmediatePropagation();e.stopPropagation();e.preventDefault();apClose();return}if(!/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))e.stopImmediatePropagation()}},true);
+
 function profChip(){const a=SV.acct,L=lvOf(SV.xp||0);return (a&&a.photo?`<img class="pfp" src="${a.photo}">${a.nick} · `:'')+'⭐ Nv '+L+' · '}
 function pickPhoto(){if(!SV.acct){openAcct('create');toast('Crie sua conta primeiro');return}$('pfi').value='';$('pfi').click()}
 $('pfi').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{try{const cv=document.createElement('canvas');cv.width=cv.height=96;const x=cv.getContext('2d'),m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,96,96);SV.acct.photo=cv.toDataURL('image/jpeg',.8);saveSV();checkAch();renderMenu();toast('📸 Foto de perfil salva!');proRefresh()}catch(er){toast('Não consegui usar essa foto')}};im.onerror=()=>toast('Imagem inválida');im.src=r.result};r.readAsDataURL(f)};
@@ -1403,7 +1491,7 @@ function netTick(dt){
   NET.acc+=dt;if(NET.acc<.05)return;NET.acc=0;const c=player;
   netSend({t:'s',id:NET.me,n:++NET.seq,s:Math.round(performance.now()),d:[r1(c.x),r1(c.y),r3(c.a),r1(c.vx),r1(c.vy),r1(c.speed),c.prog,c.fin===null?-1:r3(c.fin),r1(c.hp),c.dead?1:0,r3(c.boost),r3(c.shield),r3(c.stun),r3(c.inv||0)]});
 }
-setTimeout(frRestart,1500);reset();renderMenu();requestAnimationFrame(loop);
+setTimeout(frRestart,1500);setTimeout(agTick,4000);setInterval(agTick,20000);reset();renderMenu();requestAnimationFrame(loop);
 </script>
 
 
